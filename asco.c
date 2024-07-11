@@ -88,7 +88,7 @@ int main(int argc, char *argv[])
 	#endif
 /*mpi: MPI initialization*/
 	if (argc < 3) { /* number of arguments */
-		printf("\nUsage : asco -<simulator> <inputfile>\n");
+		printf("\nUsage : asco -<simulator> <inputfile> <extra_options>\n");
 		printf("\nExamples:\n");
 		printf("          asco -eldo    <inputfile>.cir\n");
 		printf("          asco -hspice  <inputfile>.sp\n");
@@ -97,7 +97,10 @@ int main(int argc, char *argv[])
 		printf("          asco -qucs    <inputfile>.txt\n");
 		printf("          asco -ngspice <inputfile>.sp\n");
 		printf("          asco -general <inputfile>.*\n");
-		printf("\nDefault file extension is assumed if not specified\n\n\n");
+		printf("\nDefault file extension is assumed if not specified\n\n");
+		printf("The list of extra options (could be omitted):\n");
+		printf("          -simulator_path <exe_file>  sets path to simulator executable\n");
+		printf("          -o <dataset_file>  sets Qucsator output dataset path\n");
 		exit(EXIT_FAILURE);
 	}
 
@@ -202,6 +205,40 @@ int main(int argc, char *argv[])
 			fflush(stdout);
 			exit(EXIT_FAILURE);
 	}
+
+    sim_exe_path = NULL;
+    size_t arg_idx = 3;
+    char *asco_sim_path_env = getenv("ASCO_SIM_PATH");
+    if (asco_sim_path_env != NULL) {
+        sim_exe_path = strdup(asco_sim_path_env);
+    }
+    if (argc >= 5) {
+        for (; arg_idx < argc; arg_idx++) {
+            if (!strcmp(argv[arg_idx],"-simulator-path")
+                 && arg_idx <= argc-2) {
+                sim_exe_path = strdup(argv[arg_idx+1]);
+                break;
+            }
+        }
+    }
+
+    if (sim_exe_path == NULL) {
+        switch (spice) {
+            case 1: sim_exe_path = strdup("eldo");
+                break;
+            case 2: sim_exe_path = strdup("hspice");
+                break;
+            case 3: sim_exe_path = strdup("ltspice");
+                break;
+            case 4: sim_exe_path = strdup("spectremdl");
+                break;
+            case 50: sim_exe_path = strdup("qucsator");
+                break;
+            case 51: sim_exe_path = strdup("ngspice");
+                break;
+            default: break;
+        }
+    }
 
 	#ifdef MPI /*If in parallel optimization mode, copy all files to /tmp/asco */
 	if (id) { /*If it is a slave process*/
@@ -401,19 +438,31 @@ int main(int argc, char *argv[])
 	{
 	#endif
 		#ifndef __MINGW32__
-		if ((spice==50) && (argc==5) ) { /*Qucs*/
-			sprintf(lkk, "cp -fp %s.dat %s.dat > /dev/null", hostname, argv[4]);
-			system(lkk); /*copy simulation output file*/
-			sprintf(lkk, "cp -fp %s.log %s.log > /dev/null", hostname, argv[4]);
-			system(lkk); /*copy log file*/
-		}
+        if ((spice==50) && (argc>=5) ) { /*Qucs*/
+            arg_idx = 3;
+            for (; arg_idx < argc; arg_idx++) {
+                if (!strcmp(argv[arg_idx],"-o") && arg_idx <= argc - 2) {
+                    sprintf(lkk, "cp -fp %s.dat %s.dat > /dev/null", hostname, argv[arg_idx+1]);
+                    system(lkk); /*copy simulation output file*/
+                    sprintf(lkk, "cp -fp %s.log %s.log > /dev/null", hostname, argv[arg_idx+1]);
+                    system(lkk); /*copy log file*/
+                    break;
+                }
+            }
+        }
 		#else
-		if ((spice==50) && (argc==5) ) { /*Qucs*/
-			sprintf(lkk, "copy /y %s.dat %s.dat > NUL", hostname, argv[4]);
-			system(lkk); /*copy simulation output file*/
-			sprintf(lkk, "copy /y %s.log %s.log > NUL", hostname, argv[4]);
-			system(lkk); /*copy log file*/
-		}
+        if ((spice==50) && (argc>=5) ) { /*Qucs*/
+            arg_idx = 3;
+            for (; arg_idx < argc; arg_idx++) {
+                if (!strcmp(argv[arg_idx],"-o") && arg_idx <= argc - 2) {
+                    sprintf(lkk, "copy /y %s.dat %s.dat > NUL", hostname, argv[arg_idx+1]);
+                    system(lkk); /*copy simulation output file*/
+                    sprintf(lkk, "copy /y %s.log %s.log > NUL", hostname, argv[arg_idx+1]);
+                    system(lkk); /*copy log file*/
+                    break;
+                }
+            }
+        }
 		#endif
 	}
 

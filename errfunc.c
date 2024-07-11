@@ -600,37 +600,37 @@ double errfunc(char *filename, double *x)
 	#endif
 	switch(spice) {
 		case 1: /*Eldo*/
-			sprintf(lkk, "nice -n 19 eldo -noconf -i %s.cir > %s.out", hostname, hostname);
+			sprintf(lkk, "nice -n 19 %s -noconf -i %s.cir > %s.out", sim_exe_path, hostname, hostname);
 			break;
 		case 2: /*HSPICE*/
 			#ifndef __MINGW32__
-			sprintf(lkk, "nice -n 19 hspice -i %s.sp -o %s.lis > /dev/null", hostname, hostname);
+			sprintf(lkk, "nice -n 19 %s -i %s.sp -o %s.lis > /dev/null", sim_exe_path, hostname, hostname);
 			#else
-			sprintf(lkk, "hspice -i %s.sp -o %s.lis > NUL", hostname, hostname);
+			sprintf(lkk, "%s -i %s.sp -o %s.lis > NUL", sim_exe_path, hostname, hostname);
 			#endif
 			break;
 		case 3: /*LTspice*/
 			#ifndef __MINGW32__
-			sprintf(lkk, "nice -n 19 ltspice -b %s.net > /dev/null", hostname);
+			sprintf(lkk, "nice -n 19 %s -b %s.net > /dev/null", sim_exe_path, hostname);
 			#else
-			sprintf(lkk, "ltspice -b %s.net > NUL", hostname);
+			sprintf(lkk, "%s -b %s.net > NUL", sim_exe_path, hostname);
 			#endif
 			break;
 		case 4: /*Spectre*/
-			sprintf(lkk, "nice -n 19 spectremdl -batch %s.mdl -design %s.scs > /dev/null", hostname, hostname);
+			sprintf(lkk, "nice -n 19 %s -batch %s.mdl -design %s.scs > /dev/null", sim_exe_path, hostname, hostname);
 			break;
 		case 50: /*Qucs*/
 			#ifndef __MINGW32__
-			sprintf(lkk, "nice -n 19 qucsator_rf -i %s.txt -o %s.dat > /dev/null", hostname, hostname);
+			sprintf(lkk, "nice -n 19 %s -i %s.txt -o %s.dat > /dev/null", sim_exe_path, hostname, hostname);
 			#else
-			sprintf(lkk, "qucsator_rf -i %s.txt -o %s.dat > NUL", hostname, hostname);
+			sprintf(lkk, "%s -i %s.txt -o %s.dat > NUL", sim_exe_path, hostname, hostname);
 			#endif
 			break;
 		case 51: /*ngspice*/
 			#ifndef __MINGW32__
-			sprintf(lkk, "nice -n 19 ngspice -b -o %s.out %s.sp > /dev/null 2>&1", hostname, hostname);
+			sprintf(lkk, "nice -n 19 %s -b -o %s.out %s.sp > /dev/null 2>&1", sim_exe_path, hostname, hostname);
 			#else
-			sprintf(lkk, "ngspice -o %s.out %s.sp > NUL", hostname, hostname);
+			sprintf(lkk, "%s -o %s.out %s.sp > NUL", sim_exe_path, hostname, hostname);
 			#endif
 			break;
 		case 100: /*general*/
