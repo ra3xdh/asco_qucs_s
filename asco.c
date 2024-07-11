@@ -99,7 +99,7 @@ int main(int argc, char *argv[])
 		printf("          asco -general <inputfile>.*\n");
 		printf("\nDefault file extension is assumed if not specified\n\n");
 		printf("The list of extra options (could be omitted):\n");
-		printf("          -simulator_path <exe_file>  sets path to simulator executable\n");
+		printf("          -simulator-path <exe_file>  sets path to simulator executable\n");
 		printf("          -o <dataset_file>  sets Qucsator output dataset path\n");
 		exit(EXIT_FAILURE);
 	}
