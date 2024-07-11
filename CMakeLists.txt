@@ -28,7 +28,13 @@ rfmodule.h
 version.h)
 
 add_definitions("-DASCO")
+
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+set(CMAKE_C_FLAGS "-fcommon -Os -g")
+else()
 set(CMAKE_C_FLAGS "-fcommon -Os")
+endif()
+
 
 add_executable(asco ${ASCO_SRCS} ${ASCO_HDRS})
 target_link_libraries(asco m)
