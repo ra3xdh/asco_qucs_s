@@ -38,7 +38,9 @@ endif()
 
 add_executable(asco ${ASCO_SRCS} ${ASCO_HDRS})
 target_link_libraries(asco m)
-
+if(WIN32)
+target_link_libraries(asco ws2_32)
+endif()
 
 install(TARGETS asco
     BUNDLE DESTINATION bin COMPONENT Runtime
