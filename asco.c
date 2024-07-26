@@ -8,16 +8,21 @@
  *
  */
 
-#include <stdio.h>
 /* #include <ctype.h> */
-#include <math.h>
 /* #include <setjmp.h> */
 /* #include <assert.h> */
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
-#ifdef __MINGW32__
+#include <stdio.h>
+#include <math.h>
+#if defined(__MINGW32__) || defined(_WIN32)
 #include <winsock2.h>
+#endif
+
+#if defined(_MSC_VER)
+#include <direct.h>  // Include direct.h for chdir
+#else
+#include <unistd.h>
 #endif
 
 
@@ -107,8 +112,8 @@ int main(int argc, char *argv[])
 
 	/**/
 	/*Step3: Initialization of all variables and structures*/
-	#ifdef __MINGW32__
-	{
+	#if defined(__MINGW32__) || defined(_WIN32)
+    {
 		WSADATA WSAData;
 		WSAStartup (0x0202, &WSAData);
 	}
@@ -125,13 +130,13 @@ int main(int argc, char *argv[])
 
 	strcpy(lkk, argv[2]);
 	ii=strpos2(lkk, "/", 1);
-	#ifdef __MINGW32__
+	#if defined(__MINGW32__) || defined(_WIN32)
 	if (ii==0)
 		ii=strpos2(lkk, "\\", 1);
 	#endif
 	if (ii) {           /*should character '/' exist, files are in a different directory*/
 		ii=(int)strlen(lkk);
-		#ifndef __MINGW32__
+		#if defined(__UNIX__) || defined(__APPLE__)
 		while (lkk[ii] != '/')
 		#else
 		while (lkk[ii] != '/' && lkk[ii] != '\\')
@@ -139,6 +144,7 @@ int main(int argc, char *argv[])
 			ii--;
 
 		lkk[ii+1]='\0';
+
 		chdir(lkk); /*now, change directory                                         */
 	}
 	else
@@ -248,7 +254,7 @@ int main(int argc, char *argv[])
 		sprintf(optimizedir, "/tmp/asco%d", pid); /*allows multiple runs on the same computer name*/
 		/*sprintf(optimizedir, "/tmp/asco"); */        /*alow one run on each computer*/
 
-		#ifndef __MINGW32__
+		#if defined(__UNIX__) || defined(__APPLE__)
 		sprintf(lkk, "mkdir %s > /dev/null", optimizedir);
 		system(lkk);
 		sprintf(lkk, "cp -rfp * %s> /dev/null", optimizedir);
@@ -375,14 +381,14 @@ int main(int argc, char *argv[])
 				sprintf(lkk, "cp -fp %s.log %s/%s_%d.log > /dev/null", hostname, currentdir, hostname, pid);
 				break;
 			case 2: /*HSPICE*/
-				#ifndef __MINGW32__
+				#if defined(__UNIX__) || defined(__APPLE__)
 				sprintf(lkk, "cp -fp %s.log %s/%s_%d.log > /dev/null", hostname, currentdir, hostname, pid);
 				#else
 				sprintf(lkk, "copy /y %s.log %s/%s_%d.log > NUL", hostname, currentdir, hostname, pid);
 				#endif
 				break;
 			case 3: /*LTspice*/
-				#ifndef __MINGW32__
+				#if defined(__UNIX__) || defined(__APPLE__)
 				sprintf(lkk, "cp -fp %s.log.log %s/%s_%d.log.log > /dev/null", hostname, currentdir, hostname, pid);
 				#else
 				sprintf(lkk, "copy /y %s.log.log %s/%s_%d.log.log > NUL", hostname, currentdir, hostname, pid);
@@ -392,21 +398,21 @@ int main(int argc, char *argv[])
 				sprintf(lkk, "cp -fp %s.log %s/%s_%d.log > /dev/null", hostname, currentdir, hostname, pid);
 				break;
 			case 50: /*Qucs*/
-				#ifndef __MINGW32__
+				#if defined(__UNIX__) || defined(__APPLE__)
 				sprintf(lkk, "cp -fp %s.log %s/%s_%d.log > /dev/null", hostname, currentdir, hostname, pid);
 				#else
 				sprintf(lkk, "copy /y %s.log %s/%s_%d.log > NUL", hostname, currentdir, hostname, pid);
 				#endif
 				break;
 			case 51: /*ngspice*/
-				#ifndef __MINGW32__
+				#if defined(__UNIX__) || defined(__APPLE__)
 				sprintf(lkk, "cp -fp %s.log %s/%s_%d.log > /dev/null", hostname, currentdir, hostname, pid);
 				#else
 				sprintf(lkk, "copy /y %s.log %s/%s_%d.log > NUL", hostname, currentdir, hostname, pid);
 				#endif
 				break;
 			case 100: /*general*/
-				#ifndef __MINGW32__
+				#if defined(__UNIX__) || defined(__APPLE__)
 				sprintf(lkk, "cp -fp %s.log %s/%s_%d.log > /dev/null", hostname, currentdir, hostname, pid);
 				#else
 				sprintf(lkk, "copy /y %s.log %s/%s_%d.log > NUL", hostname, currentdir, hostname, pid);
@@ -418,7 +424,7 @@ int main(int argc, char *argv[])
 		}
 		system(lkk); /*copy log files*/
 
-		#ifndef __MINGW32__
+		#if defined(__UNIX__) || defined(__APPLE__)
 		sprintf(lkk, "rm -rf /tmp/asco%d", pid);
 		#else
 		sprintf(lkk, "rmdir /q /s /tmp/asco%d", pid);
@@ -437,7 +443,7 @@ int main(int argc, char *argv[])
 	#else
 	{
 	#endif
-		#ifndef __MINGW32__
+		#if defined(__UNIX__) || defined(__APPLE__)
         if ((spice==50) && (argc>=5) ) { /*Qucs*/
             arg_idx = 3;
             for (; arg_idx < argc; arg_idx++) {

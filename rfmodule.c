@@ -7,16 +7,21 @@
  * Plug-in to add to 'Eldo', 'HSPICE', 'LTspice', 'Spectre', 'Qucs' and 'ngspice' circuit simulator optimization capabilities
  *
  */
-
-#include <stdio.h>
 /* #include <ctype.h> */
-#include <math.h>
 /* #include <setjmp.h> */
 /* #include <assert.h> */
+#include <math.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <strings.h>
+#if defined(_MSC_VER) 
+#define strcasecmp _stricmp
+#define strncasecmp _strnicmp
+#else
 #include <unistd.h>
+#include <strings.h> /* UNUSED CAN BE REMOVED FOR MINGW */
+#endif
+
 
 
 #include "auxfunc.h"

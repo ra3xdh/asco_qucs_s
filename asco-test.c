@@ -9,11 +9,13 @@
  */
 
 #include <string.h>
-#include <unistd.h>
-#ifdef __MINGW32__
+#if defined(__MINGW32__) || defined(__WIN32)
 #include <winsock2.h>
 #endif
 
+#if !defined(_MSC_VER)
+#include <unistd.h>
+#endif
 
 #include "de.h"
 
@@ -70,7 +72,7 @@ int main(int argc, char *argv[])
 
 	/**/
 	/*Step3: Initialization of all variables and structures*/
-	#ifdef __MINGW32__
+	#if defined(__MINGW32__) || defined(_WIN32)
 	{
 		WSADATA WSAData;
 		WSAStartup (0x0202, &WSAData);
@@ -88,13 +90,13 @@ int main(int argc, char *argv[])
 
 	strcpy(lkk, argv[2]);
 	ii=strpos2(lkk, "/", 1);
-	#ifdef __MINGW32__
+	#if defined(__MINGW32__) ||  defined(_WIN32)
 	if (ii==0)
 		ii=strpos2(lkk, "\\", 1);
 	#endif
 	if (ii) {           /*should character '/' exist, files are in a different directory*/
 		ii=(int)strlen(lkk);
-		#ifndef __MINGW32__
+		#if defined(__UNIX__) || defined(__APPLE__)
 		while (lkk[ii] != '/')
 		#else
 		while (lkk[ii] != '/' && lkk[ii] != '\\')

@@ -8,8 +8,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <strings.h>
 #include <math.h>
+
+#if defined(_MSC_VER)
+#define strcasecmp _stricmp
+#define strncasecmp _strnicmp
+#else
+#include <strings.h> /* UNUSED CAN BE REMOVED FOR MINGW */
+#endif
 
 #include "auxfunc_measurefromlis.h"
 #include "auxfunc.h"
