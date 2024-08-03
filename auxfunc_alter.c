@@ -8,11 +8,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#ifdef __MINGW32__
+#if defined(__MINGW32__) ||defined(_WIN32)
 #include <winsock2.h>
 #endif
 
+#if !defined(_MSC_VER)
 #include <unistd.h>
+#endif
 
 #include "auxfunc_alter.h"
 #include "auxfunc.h"
@@ -236,7 +238,7 @@ void CreateALTERinc(char *ConfigFile, char *OutputFile, int append)
 						printf("auxfunc_alter.c - CreateALTERinc -- Something unexpected has happened!\n");
 						exit(EXIT_FAILURE);
 				}
-				#ifdef __MINGW32__
+				#if defined(__MINGW32__) ||  defined(_WIN32)
 				fseek(falterINC, -1, SEEK_CUR);               /*properly position the pointer*/
 				#endif
 			}

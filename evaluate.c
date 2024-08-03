@@ -7,16 +7,15 @@
  * Plug-in to add to 'Eldo', 'HSPICE', 'LTspice', 'Spectre' and 'Qucs' circuit simulator optimization capabilities
  *
  */
-
-#include <stdio.h>
-/* #include <ctype.h> */
-#include <math.h>
+/* #include <ctype.h>  */
 /* #include <setjmp.h> */
 /* #include <assert.h> */
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
+/* #include <unistd.h> */
 
+#include <math.h> /* UNUSED */
+#include <stdio.h> /* USED FOR DEBUG */
+#include <stdlib.h> /* UNUSED */
+#include <string.h> /* UNUSED */
 
 #include "auxfunc.h"
 #include "initialize.h"

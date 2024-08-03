@@ -25,8 +25,9 @@
 
 /*BEGIN*/
 /*Run-time library for use with "p2c", the Pascal to C translator*/
-#include <stdio.h>
 /* #include <ctype.h> */
+
+#include <stdio.h>
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>

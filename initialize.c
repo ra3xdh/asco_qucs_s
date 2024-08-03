@@ -8,16 +8,20 @@
  *
  */
 
-#include <stdio.h>
+
 /* #include <ctype.h> */
-#include <math.h>
 /* #include <setjmp.h> */
 /* #include <assert.h> */
+#include <math.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
-#ifdef __MINGW32__
+#include <stdio.h>
+#if defined(__MINGW32__) ||defined(_WIN32)
 #include <winsock2.h>
+#endif
+
+#if !defined(_MSC_VER)
+#include <unistd.h>
 #endif
 
 
@@ -869,7 +873,7 @@ int initialize(char *filename) /* , double *x) */
 		} else {                                                          /*a line with "MEASURE_VAR" exist in "/extract/<file>"*/
 			while (!strcmp((sprintf(laux, "%.11s", lkk), laux), "MEASURE_VAR")) {
 				DecodeSymbolNode(lkk, i);
-				#ifndef __MINGW32__
+				#if defined(__UNIX__) || defined(__APPLE__)
 				ii=ProcessMeasureVar(lkk, ii, "/dev/null");
 				#else
 				ii=ProcessMeasureVar(lkk, ii, "NUL");

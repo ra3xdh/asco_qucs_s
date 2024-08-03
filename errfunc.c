@@ -7,23 +7,29 @@
  * Plug-in to add to 'Eldo', 'HSPICE', 'LTspice', 'Spectre', 'Qucs' and 'ngspice' circuit simulator optimization capabilities
  *
  */
-
-#include <stdio.h>
 /* #include <ctype.h> */
-#include <math.h>
 /* #include <setjmp.h> */
 /* #include <assert.h> */
+
+#include <stdio.h>
+#include <math.h>
 #include <stdlib.h>
 #include <string.h>
-#include <strings.h>
-#include <unistd.h>
-#include <signal.h>
-#ifndef __MINGW32__
-#include <sys/wait.h>
-#else
+#if defined(__MINGW32__) || defined(_WIN32)
 #include <winsock2.h>
+#else
+#include <sys/wait.h>
 #endif
 
+#if defined(_MSC_VER)
+#define strcasecmp _stricmp
+#define strncasecmp _strnicmp
+#else
+#include <unistd.h>
+#include <strings.h> /* UNUSED MAYBE REMOVED FOR MINGW*/
+#endif
+
+#include <signal.h>
 
 #include "auxfunc.h"
 #include "auxfunc_alter.h"
@@ -373,15 +379,16 @@ void WriteToMem(int num_measures)
 			measurements[j].measured_value=asc2real(laux, 1, (int)strlen(laux)); /*4- convert it to double                                           */
 
 			if (!fcmp(measurements[j].measured_value, 0)) {                      /*5- check NaN and other text strings                               */
-				if ((laux[0] < 43) || (laux[0] > 57) ) /*if its text*/
-					if (measurements[j].objective_constraint == 1) /*1=MIN*/
-						measurements[j].measured_value=+1e+30; /*so that a large cost is later assigned*/
-					if (measurements[j].objective_constraint == 2) /*2=MAX*/
-						measurements[j].measured_value=-1e+30; /*so that a large cost is later assigned*/
-					if (measurements[j].objective_constraint == 4) /*4=LE*/
-						measurements[j].measured_value=+1e+30; /*so that a large cost is later assigned*/
-					if (measurements[j].objective_constraint > 4)  /*5=GE, 6=EQ*/
-						measurements[j].measured_value=-1e+30; /*so that a large cost is later assigned*/
+				if ((laux[0] < 43) || (laux[0] > 57) ){ /*if its text*/
+                    if (measurements[j].objective_constraint == 1 || measurements[j].objective_constraint == 4) {
+                        /* 1=MIN, 4=LE */
+                        measurements[j].measured_value = +1e+30; /* so that a large cost is later assigned */
+                    } else if (measurements[j].objective_constraint == 2 || measurements[j].objective_constraint > 4) {
+                        /* 2=MAX, >4=GE/EQ */
+                        measurements[j].measured_value = -1e+30; /* so that a large cost is later assigned */
+                    }
+                }
+
 			}
 		}
 		i++;
@@ -603,14 +610,14 @@ double errfunc(char *filename, double *x)
 			sprintf(lkk, "nice -n 19 %s -noconf -i %s.cir > %s.out", sim_exe_path, hostname, hostname);
 			break;
 		case 2: /*HSPICE*/
-			#ifndef __MINGW32__
+			#if defined (__UNIX__) || defined (__APPLE__)
 			sprintf(lkk, "nice -n 19 %s -i %s.sp -o %s.lis > /dev/null", sim_exe_path, hostname, hostname);
 			#else
 			sprintf(lkk, "%s -i %s.sp -o %s.lis > NUL", sim_exe_path, hostname, hostname);
 			#endif
 			break;
 		case 3: /*LTspice*/
-			#ifndef __MINGW32__
+			#if defined (__UNIX__) || defined (__APPLE__)
 			sprintf(lkk, "nice -n 19 %s -b %s.net > /dev/null", sim_exe_path, hostname);
 			#else
 			sprintf(lkk, "%s -b %s.net > NUL", sim_exe_path, hostname);
@@ -620,21 +627,21 @@ double errfunc(char *filename, double *x)
 			sprintf(lkk, "nice -n 19 %s -batch %s.mdl -design %s.scs > /dev/null", sim_exe_path, hostname, hostname);
 			break;
 		case 50: /*Qucs*/
-			#ifndef __MINGW32__
+			#if defined (__UNIX__) || defined (__APPLE__)
 			sprintf(lkk, "nice -n 19 %s -i %s.txt -o %s.dat > /dev/null", sim_exe_path, hostname, hostname);
 			#else
 			sprintf(lkk, "%s -i %s.txt -o %s.dat > NUL", sim_exe_path, hostname, hostname);
 			#endif
 			break;
 		case 51: /*ngspice*/
-			#ifndef __MINGW32__
+            #if defined (__UNIX__) || defined (__APPLE__)
 			sprintf(lkk, "nice -n 19 %s -b -o %s.out %s.sp > /dev/null 2>&1", sim_exe_path, hostname, hostname);
 			#else
 			sprintf(lkk, "%s -o %s.out %s.sp > NUL", sim_exe_path, hostname, hostname);
 			#endif
 			break;
 		case 100: /*general*/
-			#ifndef __MINGW32__
+            #if defined (__UNIX__) || defined (__APPLE__)
 			sprintf(lkk, "nice -n 19 ./general.sh %s %s", hostname, hostname);
 			#else
 			sprintf(lkk, "./general.sh %s %s", hostname, hostname);
@@ -645,7 +652,7 @@ double errfunc(char *filename, double *x)
 			exit(EXIT_FAILURE);
 	}
 	ii=system(lkk);
-	#ifndef __MINGW32__
+	#if defined (__UNIX__) || defined (__APPLE__)
 	if (WIFSIGNALED(ii) && (WTERMSIG(ii) == SIGINT || WTERMSIG(ii) == SIGQUIT)) {
 		printf("errfunc.c - Step3 -- Ctrl-C key pressed. Exiting optimization loop.\n");
 		fflush(stdout);
@@ -796,7 +803,7 @@ strcpy (filename_x, filename);
 					CreateALTERinc(filename_x, lkk, 1); /*execute the 'alter' tool*/
 					fseek(fspice_tmp, 0, SEEK_END); /*properly position the pointer*/
 				} else { /* file 'alter.inc', so use it instead of the 'alter' tool */
-					#ifndef __MINGW32__
+					#if defined (__UNIX__) || defined (__APPLE__)
 					fseek(fspice_tmp, -5, SEEK_END); /*properly position the pointer*/
 					#else
 					fseek(fspice_tmp, -6, SEEK_END); /*properly position the pointer*/

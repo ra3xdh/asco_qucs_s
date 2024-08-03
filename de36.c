@@ -77,13 +77,17 @@
 **                                                                  **
 ***H*O*C*E***********************************************************/
 #include <string.h>
-#include <unistd.h>
 #include <signal.h>
-#ifdef __MINGW32__
+#if defined(__MINGW32__) || defined(_WIN32)
 #include <windows.h>
 #define SIGQUIT 3
 #define sleep(seconds)    Sleep(seconds*1000)
 #endif
+
+#if !defined(_MSC_VER)
+#include <unistd.h>
+#endif
+
 
 
 #include "de.h"

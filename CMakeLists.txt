@@ -1,6 +1,10 @@
 cmake_minimum_required(VERSION 3.5)
 project(ASCO C)
 
+set(CMAKE_C_STANDARD 11)
+set(CMAKE_C_STANDARD_REQUIRED ON)
+set(CMAKE_C_EXTENSIONS OFF)
+
 set(ASCO_SRCS
 asco.c 
 auxfunc_alter.c
@@ -27,19 +31,32 @@ initialize.h
 rfmodule.h
 version.h)
 
-add_definitions("-DASCO")
+add_compile_definitions(ASCO)
 
-if (CMAKE_BUILD_TYPE STREQUAL "Debug")
-set(CMAKE_C_FLAGS "-fcommon -Os -g")
+if(MSVC)
+    add_compile_definitions(_CRT_SECURE_NO_WARNINGS)
+    if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+        set(CMAKE_C_FLAGS "/MP /Zc:preprocessor /Od")
+    else()
+        set(CMAKE_C_FLAGS "/MP /Zc:preprocessor /Os")
+    endif()
 else()
-set(CMAKE_C_FLAGS "-fcommon -Os")
+    if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+        set(CMAKE_C_FLAGS "-Wall -Wextra -fcommon -O0 -g")
+    else()
+        set(CMAKE_C_FLAGS "-fcommon -Os")
+    endif()
 endif()
 
 
 add_executable(asco ${ASCO_SRCS} ${ASCO_HDRS})
-target_link_libraries(asco m)
+
+if (NOT MSVC)
+    target_link_libraries(asco m)
+endif()
+
 if(WIN32)
-target_link_libraries(asco ws2_32)
+    target_link_libraries(asco ws2_32)
 endif()
 
 install(TARGETS asco
